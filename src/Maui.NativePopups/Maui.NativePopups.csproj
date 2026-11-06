@@ -1,0 +1,70 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>net10.0;net10.0-android;net10.0-ios;net10.0-maccatalyst;net11.0;net11.0-android;net11.0-ios;net11.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0;net11.0-windows10.0.19041.0</TargetFrameworks>
+
+		<UseMaui>true</UseMaui>
+		<SingleProject>false</SingleProject>
+		<!-- WinUI resource lookup must match the RID-neutral library build output. -->
+		<AppendRuntimeIdentifierToOutputPath Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">false</AppendRuntimeIdentifierToOutputPath>
+
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+
+		<IsAotCompatible>true</IsAotCompatible>
+		<IsTrimmable>true</IsTrimmable>
+
+		<AssemblyName>Maui.NativePopups</AssemblyName>
+		<RootNamespace>Maui.NativePopups</RootNamespace>
+		<AndroidResgenNamespace>Maui.NativePopups.PlatformResources</AndroidResgenNamespace>
+		<PackageId>Redth.Maui.NativePopups</PackageId>
+		<Title>Native popups for .NET MAUI</Title>
+		<Summary>Native menus, action sheets, alerts, sheets, popovers, pickers and date/time pickers for .NET MAUI.</Summary>
+		<Description>Native menus, action sheets, alerts, sheets, popovers, pickers and date/time pickers for .NET MAUI: UIKit on iOS / Mac Catalyst, Material 3 on Android, WinUI on Windows.</Description>
+		<PackageTags>maui;popup;sheet;bottomsheet;popover;menu;picker;actionsheet;native</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Authors>Redth</Authors>
+		<NeutralLanguage>en</NeutralLanguage>
+		<GitThisAssemblyMetadata>True</GitThisAssemblyMetadata>
+		<RepositoryUrl>$(GitRepositoryUrl)</RepositoryUrl>
+		<RepositoryCommit>$(GitCommit)</RepositoryCommit>
+		<RepositoryBranch>$(GitBranch)</RepositoryBranch>
+		<RepositoryType>git</RepositoryType>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+	</PropertyGroup>
+
+	<ItemGroup Condition="$(TargetFramework.StartsWith('net10.0'))">
+		<PackageReference Include="Microsoft.Maui.Controls" Version="$(Maui10Version)" />
+	</ItemGroup>
+	<ItemGroup Condition="$(TargetFramework.StartsWith('net11.0'))">
+		<PackageReference Include="Microsoft.Maui.Controls" Version="$(Maui11Version)" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="GitInfo" Version="3.1.1" PrivateAssets="all" />
+	</ItemGroup>
+
+	<!-- Platform code lives in Platforms/Apple (iOS + Mac Catalyst), Platforms/Android and Platforms/Windows. -->
+	<ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'ios' and '$(TargetPlatformIdentifier)' != 'maccatalyst'">
+		<Compile Remove="Platforms\Apple\**" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'android'">
+		<Compile Remove="Platforms\Android\**" />
+		<AndroidResource Remove="Platforms\Android\Resources\**" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'android'">
+		<AndroidResource Include="Platforms\Android\Resources\**" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'windows'">
+		<Compile Remove="Platforms\Windows\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+</Project>

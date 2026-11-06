@@ -1,0 +1,10 @@
+<Project>
+	<PropertyGroup>
+		<!-- MAUI version per .NET major: the library multi-targets net10 and net11. -->
+		<Maui10Version>10.0.120</Maui10Version>
+		<Maui11Version>11.0.0-rc.2.26505.5</Maui11Version>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+</Project>
