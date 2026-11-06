@@ -33,7 +33,8 @@ jobs:
         global-json-file: global.json
     - name: Install MAUI Windows workload
       shell: pwsh
-      run: dotnet workload install maui-windows --version (dotnet --version)
+      # Latest workload set for the pinned SDK band (preview workload-set versions differ from the SDK version).
+      run: dotnet workload install maui-windows
     - name: Build library (Windows TFMs)
       run: dotnet build src/Maui.NativePopups/Maui.NativePopups.csproj --configuration Release "-p:TargetFrameworks=net10.0-windows10.0.19041.0;net11.0-windows10.0.19041.0" -p:PackageVersion=$env:PACKAGE_VERSION
     - name: Build Windows sample
@@ -57,7 +58,8 @@ jobs:
         distribution: microsoft
         java-version: '21'
     - name: Install MAUI workloads
-      run: dotnet workload install maui --version "$(dotnet --version)"
+      # Latest workload set for the pinned SDK band (preview workload-set versions differ from the SDK version).
+      run: dotnet workload install maui
     - name: Install Android SDK dependencies
       run: dotnet build samples/NativePopups.Sample/NativePopups.Sample.csproj -f net11.0-android -t:InstallAndroidDependencies -p:TargetFrameworks=net11.0-android -p:AcceptAndroidSDKLicenses=true -p:AndroidSdkDirectory="$ANDROID_HOME" -p:JavaSdkDirectory="$JAVA_HOME"
     - name: Build library (portable, Android, iOS, Mac Catalyst)
