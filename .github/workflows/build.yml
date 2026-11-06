@@ -36,13 +36,14 @@ jobs:
       # Latest workload set for the pinned SDK band (preview workload-set versions differ from the SDK version).
       run: dotnet workload install maui-windows
     - name: Build library (Windows TFMs)
-      run: dotnet build src/Maui.NativePopups/Maui.NativePopups.csproj --configuration Release "-p:TargetFrameworks=net10.0-windows10.0.19041.0;net11.0-windows10.0.19041.0" -p:PackageVersion=$env:PACKAGE_VERSION
+      run: dotnet build src/Maui.NativePopups/Maui.NativePopups.csproj --configuration Release -p:TargetFrameworks=net10.0-windows10.0.19041.0%3Bnet11.0-windows10.0.19041.0 -p:PackageVersion=$env:PACKAGE_VERSION
     - name: Build Windows sample
       run: dotnet build samples/NativePopups.Sample/NativePopups.Sample.csproj --configuration Release -p:TargetFrameworks=net11.0-windows10.0.19041.0 -p:RuntimeIdentifier=win-x64 -p:WindowsPackageType=None
 
   apple-android:
     name: Android, iOS, Mac Catalyst (net10 + net11)
-    # The .NET 11 workload set needs Xcode 27.x.
+    # The .NET 11 workload set needs Xcode 27.x; RC2's iOS SDK asks for exactly 27.0, so the sample
+    # builds skip that check (ValidateXcodeVersion=false), as Pool Math does.
     runs-on: xcode-27
     env:
       DEVELOPER_DIR: /Applications/Xcode_27.1.app/Contents/Developer
@@ -67,9 +68,9 @@ jobs:
     - name: Build Android sample
       run: dotnet build samples/NativePopups.Sample/NativePopups.Sample.csproj --configuration Release -p:TargetFrameworks=net11.0-android -p:AndroidPackageFormats=apk
     - name: Build iOS simulator sample
-      run: dotnet build samples/NativePopups.Sample/NativePopups.Sample.csproj --configuration Release -p:TargetFrameworks=net11.0-ios -p:RuntimeIdentifier=iossimulator-arm64 -p:EnableCodeSigning=false
+      run: dotnet build samples/NativePopups.Sample/NativePopups.Sample.csproj --configuration Release -p:TargetFrameworks=net11.0-ios -p:RuntimeIdentifier=iossimulator-arm64 -p:EnableCodeSigning=false -p:ValidateXcodeVersion=false
     - name: Build Mac Catalyst sample
-      run: dotnet build samples/NativePopups.Sample/NativePopups.Sample.csproj --configuration Release -p:TargetFrameworks=net11.0-maccatalyst -p:RuntimeIdentifier=maccatalyst-arm64 -p:EnableCodeSigning=false
+      run: dotnet build samples/NativePopups.Sample/NativePopups.Sample.csproj --configuration Release -p:TargetFrameworks=net11.0-maccatalyst -p:RuntimeIdentifier=maccatalyst-arm64 -p:EnableCodeSigning=false -p:ValidateXcodeVersion=false
     - name: Pack
       if: github.event_name == 'release'
       run: dotnet pack src/Maui.NativePopups/Maui.NativePopups.csproj --configuration Release -p:PackageVersion="$PACKAGE_VERSION" -o artifacts
