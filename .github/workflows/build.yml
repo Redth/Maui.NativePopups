@@ -35,8 +35,10 @@ jobs:
       shell: pwsh
       # Latest workload set for the pinned SDK band (preview workload-set versions differ from the SDK version).
       run: dotnet workload install maui-windows
-    - name: Build library (Windows TFMs)
-      run: dotnet build src/Maui.NativePopups/Maui.NativePopups.csproj --configuration Release -p:TargetFrameworks=net10.0-windows10.0.19041.0%3Bnet11.0-windows10.0.19041.0 -p:PackageVersion=$env:PACKAGE_VERSION
+    - name: Build library (net10 Windows)
+      run: dotnet build src/Maui.NativePopups/Maui.NativePopups.csproj --configuration Release -f net10.0-windows10.0.19041.0 -p:PackageVersion=$env:PACKAGE_VERSION
+    - name: Build library (net11 Windows)
+      run: dotnet build src/Maui.NativePopups/Maui.NativePopups.csproj --configuration Release -f net11.0-windows10.0.19041.0 -p:PackageVersion=$env:PACKAGE_VERSION
     - name: Build Windows sample
       run: dotnet build samples/NativePopups.Sample/NativePopups.Sample.csproj --configuration Release -p:TargetFrameworks=net11.0-windows10.0.19041.0 -p:RuntimeIdentifier=win-x64 -p:WindowsPackageType=None
 
