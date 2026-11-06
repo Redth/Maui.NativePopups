@@ -1,0 +1,78 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PACKAGE_VERSION: ${{ github.event_name == 'release' && github.ref_name || format('0.999.0-ci{0}', github.run_id) }}
+  DOTNET_NOLOGO: true
+  # Keep GitInfo metadata without replacing the version selected for this run.
+  GitVersion: 'false'
+
+jobs:
+  windows:
+    name: Windows (net10 + net11)
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
+    - name: Install MAUI Windows workload
+      shell: pwsh
+      run: dotnet workload install maui-windows --version (dotnet --version)
+    - name: Build library (Windows TFMs)
+      run: dotnet build src/Maui.NativePopups/Maui.NativePopups.csproj --configuration Release "-p:TargetFrameworks=net10.0-windows10.0.19041.0;net11.0-windows10.0.19041.0" -p:PackageVersion=$env:PACKAGE_VERSION
+    - name: Build Windows sample
+      run: dotnet build samples/NativePopups.Sample/NativePopups.Sample.csproj --configuration Release -p:TargetFrameworks=net11.0-windows10.0.19041.0 -p:RuntimeIdentifier=win-x64 -p:WindowsPackageType=None
+
+  apple-android:
+    name: Android, iOS, Mac Catalyst (net10 + net11)
+    # The .NET 11 workload set needs Xcode 27.x.
+    runs-on: xcode-27
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.1.app/Contents/Developer
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
+    - uses: actions/setup-java@v4
+      with:
+        distribution: microsoft
+        java-version: '21'
+    - name: Install MAUI workloads
+      run: dotnet workload install maui --version "$(dotnet --version)"
+    - name: Install Android SDK dependencies
+      run: dotnet build samples/NativePopups.Sample/NativePopups.Sample.csproj -f net11.0-android -t:InstallAndroidDependencies -p:TargetFrameworks=net11.0-android -p:AcceptAndroidSDKLicenses=true -p:AndroidSdkDirectory="$ANDROID_HOME" -p:JavaSdkDirectory="$JAVA_HOME"
+    - name: Build library (portable, Android, iOS, Mac Catalyst)
+      run: dotnet build src/Maui.NativePopups/Maui.NativePopups.csproj --configuration Release -p:PackageVersion="$PACKAGE_VERSION"
+    - name: Build Android sample
+      run: dotnet build samples/NativePopups.Sample/NativePopups.Sample.csproj --configuration Release -p:TargetFrameworks=net11.0-android -p:AndroidPackageFormats=apk
+    - name: Build iOS simulator sample
+      run: dotnet build samples/NativePopups.Sample/NativePopups.Sample.csproj --configuration Release -p:TargetFrameworks=net11.0-ios -p:RuntimeIdentifier=iossimulator-arm64 -p:EnableCodeSigning=false
+    - name: Build Mac Catalyst sample
+      run: dotnet build samples/NativePopups.Sample/NativePopups.Sample.csproj --configuration Release -p:TargetFrameworks=net11.0-maccatalyst -p:RuntimeIdentifier=maccatalyst-arm64 -p:EnableCodeSigning=false
+    - name: Pack
+      if: github.event_name == 'release'
+      run: dotnet pack src/Maui.NativePopups/Maui.NativePopups.csproj --configuration Release -p:PackageVersion="$PACKAGE_VERSION" -o artifacts
+    - uses: actions/upload-artifact@v4
+      if: github.event_name == 'release'
+      with:
+        name: nuget
+        path: artifacts/*.nupkg

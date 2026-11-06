@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Maui.NativePopups/Maui.NativePopups.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/NativePopups.Sample/NativePopups.Sample.csproj" />
+  </Folder>
+</Solution>
