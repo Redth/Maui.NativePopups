@@ -67,7 +67,7 @@ Pool Math is a private repo, `poolmath/PoolMath`, with a local checkout at `~/co
 | `Platforms/Android/Native/AddLogMenu.cs` | App `PopupMenu` with icons (`SetForceShowIcon`) | Pattern for M1 |
 | `Platforms/Android/Native/NativeBottomSheet.cs` | Reusable `BottomSheetDialog` hosting MAUI content; rebuilt after a light/dark switch | M2 |
 | `Platforms/Android/Native/AndroidSheet.cs` | One-shot bottom sheet for MAUI content, sized Fit/Medium/Large, with background tint | M2 |
-| `Platforms/Android/Native/AndroidPicker.cs` | `PopupMenu` with a radio group, or a bottom sheet with an outlined search field, section headers and check rows | M4 |
+| `Platforms/Android/Native/AndroidPicker.cs` | `PopupMenu` with a radio group, or a bottom sheet with Material 3 list items (radio, tinted selected row, ripple, 56/72dp), section subheads + dividers, a search field (search icon + clear) and title actions (Pool Math #496/#497) | M4 |
 | `Platforms/Android/Native/AndroidDateTimePickers.cs` | `MauiDatePicker` / `MauiTimePicker` `ShowPicker` → `MaterialDatePicker` / `MaterialTimePicker` | M5 |
 | `Platforms/Android/Resources/values{,-night}/colors.xml`, `values/styles.xml` | Hand-written M3 tonal palette (`pm_m3_*`), `PmNativeTheme`, `PmDatePickerTheme`, `PmTimePickerTheme` | Replace with seed-generated roles (see §6). |
 | `Platforms/Android/MainActivity.cs` | `Theme.ApplyStyle(PmNativeTheme, force: false)` adds the M3 attributes onto the M2 app theme; `DispatchTouchEvent` feeds the tracker | The plugin must do both without the app's activity (see §6). |
@@ -190,7 +190,10 @@ Hosting MAUI content natively uses `view.ToPlatform(mauiContext)`. On Windows th
     - The action may present something else, and UIKit ignores a presentation while a dismissal is running.
     - A `UINavigationController`'s `ViewDidDisappear` fires *before* the dismiss completion block, so record the chosen action first and resolve from the dismissed callback.
 18. **Short sheets fit their content:** use a custom detent from the laid-out table height (`ContentSize` + `AdjustedContentInset`), and re-measure on `ViewDidLayoutSubviews` → `InvalidateDetents`.
-19. **iOS date/time:** don't replace the text field's delegate (MAUI owns it). Overlay a clear button instead.
+19. **Android list rows:**
+    - The Views library has no Material 3 list-item component, so build rows to spec (radio, secondary-container selected tint, ripple, 56/72dp).
+    - Setting a row's background drawable replaces the view's padding with the drawable's, e.g. an `InsetDrawable`'s, so re-apply the padding.
+20. **iOS date/time:** don't replace the text field's delegate (MAUI owns it). Overlay a clear button instead.
 
 ## 7. Milestones and acceptance
 
