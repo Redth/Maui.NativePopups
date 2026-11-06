@@ -34,7 +34,8 @@ jobs:
     - name: Install MAUI Windows workload
       shell: pwsh
       # Latest workload set for the pinned SDK band (preview workload-set versions differ from the SDK version).
-      run: dotnet workload install maui-windows
+      # wasm-tools-net10: needed by the net10 MAUI targets when building with the .NET 11 SDK.
+      run: dotnet workload install maui-windows wasm-tools-net10
     - name: Build library (net10 Windows)
       run: dotnet build src/Maui.NativePopups/Maui.NativePopups.csproj --configuration Release -f net10.0-windows10.0.19041.0 -p:PackageVersion=$env:PACKAGE_VERSION
     - name: Build library (net11 Windows)
