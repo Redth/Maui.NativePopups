@@ -1,6 +1,6 @@
 # Roadmap
 
-Maui.NativePopups packages the native presentation layer built for Pool Math (its PRs #489–#495) as a reusable plugin.
+Maui.NativePopups packages the native presentation layer built for Pool Math (its PRs #489–#495) as a reusable plugin. The detailed working plan (source map, platform mapping, gotchas, checklists) is in [PLAN.md](PLAN.md).
 
 ## Principles
 
