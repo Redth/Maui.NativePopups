@@ -57,7 +57,7 @@ Pool Math is a private repo, `poolmath/PoolMath`, with a local checkout at `~/co
 | `Apple/NativePopover.cs` | Hosts a MAUI `View` in a popover; `MauiContentController` with safe-area constraints; re-measures on layout and safe-area changes; Catalyst bar-button fix | M3 popovers, and the host that M2 sheets share |
 | `Apple/PopoverAdaptiveDelegate.cs` | Keeps popovers as popovers on iPhone | shared |
 | `Apple/AppleSheet.cs` | `UISheetPresentationController`; sizes Fit (custom detent, iOS 16+) / Medium / Large; grabber; user-dismiss callback | M2 |
-| `Apple/ApplePicker.cs` | Sheet with an inset-grouped `UITableView` + `UISearchController`, sections, checkmark; `ApplePickerMenu` overlay `UIButton` + `UIMenu` with a deferred element | M4 |
+| `Apple/ApplePicker.cs` | Sheet with an inset-grouped `UITableView` + `UISearchController`, sections, checkmark, title actions, fit-to-content detent, glass background (Pool Math #496); `ApplePickerMenu` overlay `UIButton` + `UIMenu` with a deferred element | M4. Also the basis for list sheets with toolbar actions. |
 | `Apple/AppleDateTimePickers.cs` | Mapper append: clear overlay button on MAUI date/time text fields → popover with an inline calendar or wheels | M5 |
 | `Apple/AddLogMenu.cs` | App-specific `UIMenu` on a `UIButton` (`ShowsMenuAsPrimaryAction`), using `UIDeferredMenuElement` so items are rebuilt on open | Pattern for M1 `NativeMenu` (the contents stay in Pool Math) |
 | `Platforms/Android/Native/NativeTheme.cs` | `ContextThemeWrapper` with `PmNativeTheme` | M1. Generate the theme from a seed colour (see §6). |
@@ -182,7 +182,15 @@ Hosting MAUI content natively uses `view.ToPlatform(mauiContext)`. On Windows th
     - Keep stable identifiers: menu items carry their text and content description, and sheet titles get an id (Pool Math used `labelPickerPopupTitle`).
     - Pool Math's Appium helper waits for "the title **or** the item".
 15. **Android `DatePicker` hooks:** `MauiDatePicker.ShowPicker` / `MauiTimePicker.ShowPicker` are settable. Set them in a mapper append (custom key), which runs after `ConnectHandler`. They exist in MAUI 10.0.90+ and 11.
-16. **iOS date/time:** don't replace the text field's delegate (MAUI owns it). Overlay a clear button instead.
+16. **iOS 26 glass sheets:**
+    - A sheet is Liquid Glass at partial heights only if its content leaves the background clear (e.g. `UITableView.BackgroundColor = Clear`).
+    - Put the title and buttons in a real `UINavigationController` bar (system close + glass bar buttons), not in custom content.
+    - Pool Math's first Switch Pool sheet (opaque background, custom header) wasn't glass. It was fixed in its PR #496 by making it a native list sheet with title actions.
+17. **Report an action after the sheet has finished dismissing:**
+    - The action may present something else, and UIKit ignores a presentation while a dismissal is running.
+    - A `UINavigationController`'s `ViewDidDisappear` fires *before* the dismiss completion block, so record the chosen action first and resolve from the dismissed callback.
+18. **Short sheets fit their content:** use a custom detent from the laid-out table height (`ContentSize` + `AdjustedContentInset`), and re-measure on `ViewDidLayoutSubviews` → `InvalidateDetents`.
+19. **iOS date/time:** don't replace the text field's delegate (MAUI owns it). Overlay a clear button instead.
 
 ## 7. Milestones and acceptance
 
